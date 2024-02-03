@@ -1,0 +1,15 @@
+{{- if .Values.postgresql.enabled -}}
+services:
+  postgresql:
+    image: "{{ include "postgresql.image" . }}"
+    restart: always
+    environment:
+      - POSTGRES_USER={{ .Values.postgresql.auth.username }}
+      - POSTGRES_PASSWORD={{ .Values.postgresql.auth.password }}
+      - POSTGRES_DB={{ .Values.postgresql.auth.database }}
+      - POSTGRES_PORT={{ .Values.postgresql.ports.postgresql }}
+    networks:
+      - gitea
+    volumes:
+      - {{ .Values.postgresql.volumes.data }}:/var/lib/postgresql/data
+{{- end }}

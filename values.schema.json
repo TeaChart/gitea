@@ -1,0 +1,215 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "gitea": {
+            "type": "object",
+            "properties": {
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        },
+                        "rootless": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "container_name": {
+                    "type": "string"
+                },
+                "restart": {
+                    "type": "string"
+                },
+                "admin_username": {
+                    "type": "string"
+                },
+                "admin_password": {
+                    "type": "string"
+                },
+                "ports": {
+                    "type": "object",
+                    "properties": {
+                        "http": {
+                            "type": "integer"
+                        },
+                        "ssh": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "volumes": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "mysql": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "container_name": {
+                    "type": "string"
+                },
+                "restart": {
+                    "type": "string"
+                },
+                "root_password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "database": {
+                    "type": "string"
+                },
+                "volumes": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "postgres": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "container_name": {
+                    "type": "string"
+                },
+                "restart": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "database": {
+                    "type": "string"
+                },
+                "volumes": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "redis": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "container_name": {
+                    "type": "string"
+                },
+                "restart": {
+                    "type": "string"
+                },
+                "volumes": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "runner": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "container_name": {
+                    "type": "string"
+                },
+                "restart": {
+                    "type": "string"
+                },
+                "runner_name": {
+                    "type": "string"
+                },
+                "runner_labels": {
+                    "type": "string"
+                },
+                "volumes": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

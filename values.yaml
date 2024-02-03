@@ -1,0 +1,184 @@
+# Default values for gitea.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+## @section Global
+#
+## @param global.imageRegistry global image registry override
+## @param global.imagePullSecrets global image pull secrets override; can be extended by `imagePullSecrets`
+## @param global.storageClass global storage class override
+## @param global.hostAliases global hostAliases which will be added to the pod's hosts files
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+  hostAliases: []
+  # - ip: 192.168.137.2
+  #   hostnames:
+  #   - example.com
+
+## @section Service
+service:
+  http:
+    port: 3000
+  ssh:
+    port: 22
+
+## @section Image
+## @param image.registry image registry, e.g. gcr.io,docker.io
+## @param image.repository Image to start for this pod
+## @param image.tag Visit: [Image tag](https://hub.docker.com/r/gitea/gitea/tags?page=1&ordering=last_updated). Defaults to `appVersion` within Chart.yaml.
+## @param image.digest Image digest. Allows to pin the given image tag. Useful for having control over mutable tags like `latest`
+## @param image.pullPolicy Image pull policy
+## @param image.rootless Wether or not to pull the rootless version of Gitea, only works on Gitea 1.14.x or higher
+## @param image.fullOverride Completely overrides the image registry, path/image, tag and digest. **Adjust `image.rootless` accordingly and review [Rootless defaults](#rootless-defaults).**
+image:
+  registry: ""
+  repository: gitea/gitea
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+  digest: ""
+  pullPolicy: IfNotPresent
+  rootless: true
+  fullOverride: ""
+
+## @param deployment.env  Additional environment variables to pass to containers
+## @param deployment.terminationGracePeriodSeconds How long to wait until forcefully kill the pod
+## @param deployment.labels Labels for the deployment
+## @param deployment.annotations Annotations for the Gitea deployment to be created
+deployment:
+  env:
+    []
+    # - VARIABLE=my-value
+  terminationGracePeriodSeconds: 60
+  labels: {}
+  annotations: {}
+
+# Configure commit/action signing prerequisites
+## @section Signing
+#
+## @param signing.enabled Enable commit/action signing
+## @param signing.gpgHome GPG home directory
+## @param signing.privateKey Inline private gpg key for signed Gitea actions
+## @param signing.existingSecret Use an existing secret to store the value of `signing.privateKey`
+signing:
+  enabled: false
+  gpgHome: /data/git/.gnupg
+  privateKey: ""
+  # privateKey: |-
+  #   -----BEGIN PGP PRIVATE KEY BLOCK-----
+  #   ...
+  #   -----END PGP PRIVATE KEY BLOCK-----
+  existingSecret: ""
+
+## @section Gitea
+#
+gitea:
+  ## @param gitea.volumes.data data volumes mount path
+  volumes:
+    data: ./gitea
+
+  ## @param .Values.gitea.ports.http http port to outside of the container
+  ## @param .Values.gitea.ports.ssh ssh port to outside of the container
+  ports:
+    http: 3000
+    ssh: 2222
+
+  ## @param gitea.admin.username Username for the Gitea admin user
+  ## @param gitea.admin.existingSecret Use an existing secret to store admin user credentials
+  ## @param gitea.admin.password Password for the Gitea admin user
+  ## @param gitea.admin.email Email for the Gitea admin user
+  admin:
+    username: gitea_admin
+    password: r8sA8CPHD9!bt6d
+    email: "gitea@local.domain"
+
+  ## @param gitea.metrics.enabled Enable Gitea metrics
+  ## @param gitea.metrics.serviceMonitor.enabled Enable Gitea metrics service monitor
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+      #  additionalLabels:
+      #    prometheus-release: prom1
+
+  config:
+    #  APP_NAME: "Gitea: Git with a cup of tea"
+    #  RUN_MODE: dev
+    server:
+      SSH_PORT: 22 # rootful image
+      SSH_LISTEN_PORT: 2222 # rootless image
+  #
+  #  security:
+  #    PASSWORD_COMPLEXITY: spec
+
+  ## @param gitea.ssh.logLevel Configure OpenSSH's log level. Only available for root-based Gitea image.
+  ssh:
+    logLevel: "INFO"
+
+    image:
+      repository: gitea/gitea
+      tag: nightly
+      rootless: false
+
+## @section PostgreSQL
+#
+## @param postgresql.enabled Enable PostgreSQL
+## @param postgresql.auth.password Password for the `gitea` user (overrides `auth.password`)
+## @param postgresql.auth.database Name for a custom database to create (overrides `auth.database`)
+## @param postgresql.auth.username Name for a custom user to create (overrides `auth.username`)
+## @param postgresql.service.ports.postgresql PostgreSQL service port (overrides `service.ports.postgresql`)
+## @param postgresql.primary.persistence.size PVC Storage Request for PostgreSQL volume
+postgresql:
+  enabled: true
+  image:
+    registry: ""
+    repository: postgres
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "16.1"
+    digest: ""
+    pullPolicy: IfNotPresent
+    fullOverride: ""
+  auth:
+    password: gitea
+    database: gitea
+    username: gitea
+  ports:
+    postgresql: 5432
+  primary:
+    persistence:
+      size: 10Gi
+
+  ## @param runner.volumes.data data mount path
+  ## @param runner.volumes.config config mount path
+  volumes:
+    data: ./postgresql/data
+
+## @section Act Runner
+runner:
+  ## @param runner.enabled Enable act runner
+  enabled: true
+
+  ## @param runner.name Act runner name
+  name: gitea_runner
+
+  image:
+    registry: ""
+    repository: gitea/act_runner
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "0.2.6"
+    digest: ""
+    pullPolicy: IfNotPresent
+    fullOverride: ""
+
+  ## @param runner.volumes.data data mount path
+  ## @param runner.volumes.config config mount path
+  volumes:
+    data: ./runner/data
+    config: ./runner/config
+
+  ## @param runner.runner_labels act runner labels
+  labels: ubuntu-latest:docker://node:16-bullseye,ubuntu-22.04:docker://node:16-bullseye,ubuntu-20.04:docker://node:16-bullseye,ubuntu-18.04:docker://node:16-buster

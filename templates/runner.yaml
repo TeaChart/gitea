@@ -1,0 +1,31 @@
+{{- if .Values.runner.enabled -}}
+services:
+  runner:
+    image: "{{ include "runner.image" . }}"
+    restart: always
+    environment:
+      CONFIG_FILE: /config/config.yaml
+      GITEA_INSTANCE_URL: http://gitea:3000
+      GITEA_RUNNER_NAME: {{ .Values.runner.name }}
+      GITEA_RUNNER_REGISTRATION_TOKEN_FILE: /token
+      GITEA_RUNNER_LABELS: {{ .Values.runner.labels }}
+    secrets:
+      - generate_runner_token.sh
+      - configure_runner.sh
+    networks:
+      - gitea
+    volumes:
+      - {{ .Values.runner.volumes.config }}:/config
+      - {{ .Values.runner.volumes.data }}:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - {{ .Values.TeaChart.TempDir }}/scripts/runner:/scripts
+    entrypoint: /bin/sh -c "/run/secrets/generate_runner_token.sh && /run/secrets/configure_runner.sh && /sbin/tini -- /opt/act/run.sh"
+    depends_on:
+      - gitea
+
+secrets:
+  generate_runner_token.sh:
+    file: {{ .Values.TeaChart.TempDir }}/scripts/runner/generate_runner_token.sh
+  configure_runner.sh:
+    file: {{ .Values.TeaChart.TempDir }}/scripts/runner/configure_runner.sh
+{{- end -}}

@@ -1,0 +1,8 @@
+name: gitea
+description: teachart for gitea
+version: 0.0.1
+appVersion: nightly
+composeVersion: 2.24.0
+
+sources:
+  - https://github.com/yp05327/gitea-teachart

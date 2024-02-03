@@ -1,0 +1,121 @@
+services:
+  gitea-init:
+    image: "{{ include "gitea.image" . }}"
+    restart: on-failure
+    {{- if .Values.image.rootless }}
+    user: root
+    {{- end }}
+    environment:
+      - GITEA_APP_INI=/data/gitea/conf/app.ini
+      - GITEA_CUSTOM=/data/gitea
+      - GITEA_WORK_DIR=/data
+      - GITEA_TEMP=/tmp/gitea
+      {{- if .Values.deployment.env }}
+      {{- toYaml .Values.deployment.env | nindent 6 }}
+      {{- end }}
+      {{- if .Values.signing.enabled }}
+      - GNUPGHOME={{ .Values.signing.gpgHome }}
+      {{- end }}
+      - GITEA__SECURITY__INSTALL_LOCK=true
+      - GITEA_ADMIN_USERNAME={{ .Values.gitea.admin.username }}
+      - GITEA_ADMIN_PASSWORD={{ .Values.gitea.admin.password }}
+      {{- if .Values.image.rootless }}
+      - HOME=/data/gitea/git
+      {{- else }}
+      - USER_UID=1000
+      - USER_GID=1000
+      {{- end }}
+    networks:
+      - gitea
+    volumes:
+      - {{ .Values.gitea.volumes.data }}:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    secrets:
+      - init_directory_structure.sh
+      - config_environment.sh
+    configs:
+      {{- include "gitea.configs" . | nindent 6 }}
+    entrypoint: /bin/sh -c "/run/secrets/init_directory_structure.sh && /run/secrets/config_environment.sh"
+  
+  gitea-config:
+    image: "{{ include "gitea.image" . }}"
+    restart: on-failure
+    {{- if not .Values.image.rootless }}
+    user: "1000"
+    {{- end }}
+    environment:
+      - GITEA_APP_INI=/data/gitea/conf/app.ini
+      - GITEA_CUSTOM=/data/gitea
+      - GITEA_WORK_DIR=/data
+      - GITEA_TEMP=/tmp/gitea
+      {{- if .Values.deployment.env }}
+      {{- toYaml .Values.deployment.env | nindent 6 }}
+      {{- end }}
+      {{- if .Values.signing.enabled }}
+      - GNUPGHOME={{ .Values.signing.gpgHome }}
+      {{- end }}
+      - GITEA__SECURITY__INSTALL_LOCK=true
+      - GITEA_ADMIN_USERNAME={{ .Values.gitea.admin.username }}
+      - GITEA_ADMIN_PASSWORD={{ .Values.gitea.admin.password }}
+      {{- if .Values.image.rootless }}
+      - HOME=/data/gitea/git
+      {{- else }}
+      - USER_UID=1000
+      - USER_GID=1000
+      {{- end }}
+    networks:
+      - gitea
+    volumes:
+      - {{ .Values.gitea.volumes.data }}:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    secrets:
+      - configure_gitea.sh
+    entrypoint: /bin/sh -c "/run/secrets/configure_gitea.sh"
+    depends_on:
+      - gitea-init
+
+  gitea:
+    image: "{{ include "gitea.image" . }}"
+    restart: always
+    environment:
+      - GITEA_APP_INI=/data/gitea/conf/app.ini
+      - GITEA_CUSTOM=/data/gitea
+      - GITEA_WORK_DIR=/data
+      - GITEA_TEMP=/tmp/gitea
+      - GITEA__SECURITY__INSTALL_LOCK=true
+      - GITEA_ADMIN_USERNAME={{ .Values.gitea.admin.username }}
+      - GITEA_ADMIN_PASSWORD={{ .Values.gitea.admin.password }}
+      {{- if .Values.image.rootless }}
+      - HOME=/data/gitea/git
+      {{- else }}
+      - USER_UID=1000
+      - USER_GID=1000
+      {{- end }}
+    networks:
+      - gitea
+    ports:
+      - "{{ .Values.gitea.ports.http }}:{{ .Values.service.http.port }}"
+      - "{{ .Values.gitea.ports.ssh }}:{{ .Values.service.ssh.port }}"
+    volumes:
+      - {{ .Values.gitea.volumes.data }}:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - gitea-init
+      - gitea-config
+      {{- if .Values.postgresql.enabled }}
+      - postgresql
+      {{- end }}
+
+secrets:
+  init_directory_structure.sh:
+    file: {{ .Values.TeaChart.TempDir }}/scripts/gitea/init_directory_structure.sh
+  config_environment.sh:
+    file: {{ .Values.TeaChart.TempDir }}/scripts/gitea/config_environment.sh
+  configure_gitea.sh:
+    file: {{ .Values.TeaChart.TempDir }}/scripts/gitea/configure_gitea.sh
+
+configs:
+  {{- include "gitea.inline_configuration" . | nindent 2 }}
