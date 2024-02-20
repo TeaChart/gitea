@@ -18,14 +18,14 @@ services:
       - {{ .Values.runner.volumes.config }}:/config
       - {{ .Values.runner.volumes.data }}:/data
       - /var/run/docker.sock:/var/run/docker.sock
-      - {{ .Values.TeaChart.TempDir }}/scripts/runner:/scripts
+      - {{ .TeaChart.TempDir }}/scripts/runner:/scripts
     entrypoint: /bin/sh -c "/run/secrets/generate_runner_token.sh && /run/secrets/configure_runner.sh && /sbin/tini -- /opt/act/run.sh"
     depends_on:
       - gitea
 
 secrets:
   generate_runner_token.sh:
-    file: {{ .Values.TeaChart.TempDir }}/scripts/runner/generate_runner_token.sh
+    file: {{ .TeaChart.TempDir }}/scripts/runner/generate_runner_token.sh
   configure_runner.sh:
-    file: {{ .Values.TeaChart.TempDir }}/scripts/runner/configure_runner.sh
+    file: {{ .TeaChart.TempDir }}/scripts/runner/configure_runner.sh
 {{- end -}}

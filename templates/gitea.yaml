@@ -111,11 +111,11 @@ services:
 
 secrets:
   init_directory_structure.sh:
-    file: {{ .Values.TeaChart.TempDir }}/scripts/gitea/init_directory_structure.sh
+    file: {{ .TeaChart.TempDir }}/scripts/gitea/init_directory_structure.sh
   config_environment.sh:
-    file: {{ .Values.TeaChart.TempDir }}/scripts/gitea/config_environment.sh
+    file: {{ .TeaChart.TempDir }}/scripts/gitea/config_environment.sh
   configure_gitea.sh:
-    file: {{ .Values.TeaChart.TempDir }}/scripts/gitea/configure_gitea.sh
+    file: {{ .TeaChart.TempDir }}/scripts/gitea/configure_gitea.sh
 
 configs:
   {{- include "gitea.inline_configuration" . | nindent 2 }}
